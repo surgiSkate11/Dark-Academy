@@ -1,49 +1,29 @@
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;  // Necesario para usar UI Image
 
 public class SlotManager : MonoBehaviour
 {
-    public Slot[] slots;              // Array de todos los slots
-    public GameObject completionImage; // La imagen o GameObject que se mostrará al completar
+    public Slot[] slots; // Array de slots
 
-    void Start()
+    // Método que se llamará cuando todos los slots estén ocupados
+    public void AllSlotsFilled()
     {
-        // Asegúrate de que la imagen esté desactivada al inicio
-        if (completionImage != null)
-        {
-            completionImage.SetActive(false); // Desactiva la imagen al inicio
-        }
+        // Aquí puedes manejar la lógica que deseas realizar cuando todos los slots estén ocupados
+        GameManager.Instance.ShowEndImage(); // Mostrar la imagen de finalización
     }
 
-    void Update()
+    // Método para verificar si todos los slots están ocupados
+    public void CheckSlots()
     {
-        // Si todos los slots están llenos, muestra la imagen
-        if (AllSlotsFilled())
-        {
-            Debug.Log("¡Todos los objetos están correctamente colocados!");
-            ShowCompletionImage();
-        }
-    }
-
-    private bool AllSlotsFilled()
-    {
-        // Verificar si todos los slots están llenos
         foreach (Slot slot in slots)
         {
-            if (!slot.IsSlotFilled())
+            if (slot.currentImage == null) // Si hay algún slot vacío
             {
-                return false; // Si al menos un slot está vacío, devuelve false
+                return; // Salir del método
             }
         }
-        return true; // Si todos los slots están llenos, devuelve true
-    }
 
-    private void ShowCompletionImage()
-    {
-        if (completionImage != null && !completionImage.activeInHierarchy)
-        {
-            // Activa la imagen si no está ya activa
-            completionImage.SetActive(true);
-        }
+        AllSlotsFilled(); // Si todos los slots están ocupados
     }
 }
