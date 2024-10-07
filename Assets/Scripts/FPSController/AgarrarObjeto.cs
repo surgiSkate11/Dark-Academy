@@ -1,75 +1,76 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class AgarrarObjeto : MonoBehaviour
 {
-    public GameObject handPoint; // El punto donde el jugador sostiene el objeto
-    private GameObject pickedObject = null;
+    private bool isDragging = false;
+    private Rigidbody currentlyDraggedRigidbody;
+    private Vector3 offset;
+    private int originalLayer;
+
+    public float smoothSpeed = 5f; // Velocidad de movimiento suave
+    public float reachDistance = 3f; // Distancia para poder interactuar con objetos
+
+    private Camera playerCamera;
+
+    void Start()
+    {
+        playerCamera = Camera.main; // Obtiene la cÃ¡mara principal
+    }
 
     void Update()
     {
-        // Soltar el objeto con la tecla "r"
-        if (pickedObject != null && Input.GetKeyDown("r"))
+        Ray ray = playerCamera.ScreenPointToRay(Input.mousePosition); // Ray desde el mouse
+        RaycastHit hit;
+
+        // Si se presiona "E" o el mouse estÃ¡ presionado y no estamos arrastrando nada
+        if ((Input.GetMouseButtonDown(0) || Input.GetKeyDown(KeyCode.E)) && !isDragging)
         {
-            SoltarObjeto();
+            if (Physics.Raycast(ray, out hit, reachDistance))
+            {
+                Rigidbody hitRigidbody = hit.collider.GetComponent<Rigidbody>();
+                if (hitRigidbody != null)
+                {
+                    StartDragging(hitRigidbody, hit.point);
+                }
+            }
+        }
+
+        // Soltar el objeto con "R" o al soltar el mouse
+        if (isDragging && (Input.GetMouseButtonUp(0) || Input.GetKeyDown(KeyCode.R)))
+        {
+            StopDragging();
+        }
+
+        // Si estamos arrastrando, mover el objeto
+        if (isDragging && currentlyDraggedRigidbody != null)
+        {
+            Vector3 targetPosition = playerCamera.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, reachDistance));
+            MoveWithCollisions(targetPosition);
         }
     }
 
-    private void OnTriggerStay(Collider other)
+    private void StartDragging(Rigidbody hitRigidbody, Vector3 hitPoint)
     {
-        // Recoger el objeto si el jugador presiona "e" y no tiene objeto agarrado
-        if (other.gameObject.CompareTag("Imagen") && Input.GetKeyDown("e") && pickedObject == null)
-        {
-            RecogerObjeto(other.gameObject);
-        }
+        isDragging = true;
+        currentlyDraggedRigidbody = hitRigidbody;
+
+        originalLayer = currentlyDraggedRigidbody.gameObject.layer;
+        currentlyDraggedRigidbody.gameObject.layer = LayerMask.NameToLayer("Ignore Raycast");
+
+        offset = currentlyDraggedRigidbody.transform.position - hitPoint;
+        currentlyDraggedRigidbody.isKinematic = true;
     }
 
-    void RecogerObjeto(GameObject objeto)
+    private void StopDragging()
     {
-        // Desactivar la física mientras el objeto está en la mano
-        Rigidbody objetoRb = objeto.GetComponent<Rigidbody>();
-        if (objetoRb != null)
-        {
-            objetoRb.useGravity = false;
-            objetoRb.isKinematic = true;
-        }
-
-        // Posicionar el objeto en la mano
-        objeto.transform.position = handPoint.transform.position;
-        objeto.transform.rotation = handPoint.transform.rotation;
-        objeto.transform.SetParent(handPoint.transform);
-
-        // Activar el trigger para que no interfiera con colisiones
-        Collider objetoCollider = objeto.GetComponent<Collider>();
-        if (objetoCollider != null)
-        {
-            objetoCollider.isTrigger = true;
-        }
-
-        pickedObject = objeto; // Guardar referencia al objeto recogido
+        currentlyDraggedRigidbody.gameObject.layer = originalLayer;
+        isDragging = false;
+        currentlyDraggedRigidbody.isKinematic = false;
+        currentlyDraggedRigidbody = null;
     }
 
-    void SoltarObjeto()
+    private void MoveWithCollisions(Vector3 targetPosition)
     {
-        // Restaurar la física del objeto al soltarlo
-        Rigidbody objetoRb = pickedObject.GetComponent<Rigidbody>();
-        if (objetoRb != null)
-        {
-            objetoRb.useGravity = true;
-            objetoRb.isKinematic = false;
-        }
-
-        // Separar el objeto de la mano
-        pickedObject.transform.SetParent(null);
-
-        // Desactivar el trigger para que vuelva a interactuar con el mundo
-        Collider objetoCollider = pickedObject.GetComponent<Collider>();
-        if (objetoCollider != null)
-        {
-            objetoCollider.isTrigger = false;
-        }
-
-        pickedObject = null; // Limpiar referencia al objeto
+        currentlyDraggedRigidbody.MovePosition(Vector3.Lerp(currentlyDraggedRigidbody.transform.position, targetPosition, smoothSpeed * Time.deltaTime));
     }
 }
