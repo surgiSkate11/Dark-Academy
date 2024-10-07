@@ -1,32 +1,43 @@
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class Slot : MonoBehaviour
 {
-    public string requiredTag = "Imagen"; // Tag que debe coincidir con el objeto que va en este slot
-    private bool isSlotFilled = false;    // Para verificar si el slot ya está lleno
+    public GameObject currentImage; // Imagen actualmente en el slot
+    public SlotManager slotManager; // Referencia al SlotManager
 
-    void OnTriggerEnter(Collider other)
+    private void Start()
     {
-        // Verificar si el objeto que entra tiene el tag correcto
-        if (other.CompareTag(requiredTag) && !isSlotFilled)
+        slotManager = FindObjectOfType<SlotManager>(); // Encontrar el SlotManager
+    }
+
+    // Método para colocar la imagen en el slot
+    public void PlaceImage(GameObject image)
+    {
+        // Si el slot está vacío
+        if (currentImage == null)
         {
-            isSlotFilled = true;  // Marcar el slot como lleno
-            Debug.Log("Objeto colocado correctamente en el slot.");
+            currentImage = image;
+            image.transform.SetParent(transform); // Hacer que la imagen sea hija del slot
+            image.transform.localPosition = Vector3.zero; // Ajustar la posición de la imagen
+            image.GetComponent<Collider>().isTrigger = true; // Desactivar el collider de la imagen
+            image.GetComponent<Rigidbody>().isKinematic = true; // Evitar que la imagen caiga
+
+            // Verificar si todos los slots están ocupados
+            slotManager.CheckSlots(); // Notificar al SlotManager
         }
     }
 
-    void OnTriggerExit(Collider other)
+    // Método para liberar el slot si es necesario
+    public void ReleaseImage()
     {
-        // Cuando se retira el objeto, el slot se vuelve a liberar
-        if (other.CompareTag(requiredTag) && isSlotFilled)
+        if (currentImage != null)
         {
-            isSlotFilled = false; // El slot se vacía
-            Debug.Log("El objeto fue removido del slot.");
+            currentImage.transform.SetParent(null); // Separar la imagen del slot
+            currentImage.GetComponent<Collider>().isTrigger = false; // Reactivar el collider
+            currentImage.GetComponent<Rigidbody>().isKinematic = false; // Restaurar la física
+            currentImage = null; // Limpiar el slot
         }
-    }
-
-    public bool IsSlotFilled()
-    {
-        return isSlotFilled;
     }
 }
