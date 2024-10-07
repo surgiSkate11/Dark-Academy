@@ -2,29 +2,31 @@ using UnityEngine;
 
 public class Slot : MonoBehaviour
 {
-    private SlotManager slotManager;
+    public string requiredTag = "Imagen"; // Tag que debe coincidir con el objeto que va en este slot
+    private bool isSlotFilled = false;    // Para verificar si el slot ya está lleno
 
-    // Asignamos la referencia al SlotManager
-    void Start()
+    void OnTriggerEnter(Collider other)
     {
-        slotManager = FindObjectOfType<SlotManager>();
-    }
-
-    // Cuando un objeto con el tag "Imagen" entra en el slot
-    private void OnTriggerEnter(Collider other)
-    {
-        if (other.CompareTag("Imagen"))
+        // Verificar si el objeto que entra tiene el tag correcto
+        if (other.CompareTag(requiredTag) && !isSlotFilled)
         {
-            slotManager.AddObjectToSlot();
+            isSlotFilled = true;  // Marcar el slot como lleno
+            Debug.Log("Objeto colocado correctamente en el slot.");
         }
     }
 
-    // Cuando un objeto con el tag "Imagen" sale del slot
-    private void OnTriggerExit(Collider other)
+    void OnTriggerExit(Collider other)
     {
-        if (other.CompareTag("Imagen"))
+        // Cuando se retira el objeto, el slot se vuelve a liberar
+        if (other.CompareTag(requiredTag) && isSlotFilled)
         {
-            slotManager.RemoveObjectFromSlot();
+            isSlotFilled = false; // El slot se vacía
+            Debug.Log("El objeto fue removido del slot.");
         }
+    }
+
+    public bool IsSlotFilled()
+    {
+        return isSlotFilled;
     }
 }
