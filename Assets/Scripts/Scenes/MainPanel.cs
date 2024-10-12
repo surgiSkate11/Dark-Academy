@@ -19,6 +19,7 @@ public class MainPanel : MonoBehaviour
     [Header("Panels")]
     public GameObject mainPanel;
     public GameObject optionsPanel;
+    public GameObject controlsPanel; // Panel de Controles
 
     private void Awake()
     {
@@ -29,7 +30,7 @@ public class MainPanel : MonoBehaviour
     // Función que carga la escena "Intro"
     public void PlayGame()
     {
-        SceneManager.LoadScene("MainStory"); // Carga la escena llamada "Intro"
+        SceneManager.LoadScene("MainStory"); // Carga la escena llamada "MainStory"
     }
 
     public void ExitGame()
@@ -50,11 +51,27 @@ public class MainPanel : MonoBehaviour
         }
     }
 
+    // Método para abrir el panel de opciones
+    public void OpenOptionsPanel()
+    {
+        OpenPanel(optionsPanel);
+    }
+
+    // Método para abrir el panel de controles
+    public void OpenControlsPanel()
+    {
+        OpenPanel(controlsPanel);
+    }
+
+    // Método general para abrir un panel específico
     public void OpenPanel(GameObject panel)
     {
+        // Desactivar todos los paneles primero
         mainPanel.SetActive(false);
         optionsPanel.SetActive(false);
+        controlsPanel.SetActive(false); // Asegúrate de que el panel de controles esté desactivado
 
+        // Activar el panel solicitado
         panel.SetActive(true);
         PlaySoundButton();
     }
