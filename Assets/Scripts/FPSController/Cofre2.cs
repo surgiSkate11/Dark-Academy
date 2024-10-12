@@ -1,8 +1,8 @@
 using UnityEngine;
 
-public class Chest1 : MonoBehaviour
+public class Chest2 : MonoBehaviour
 {
-    public GameObject ImageA; // Asigna la ImageA de la letra A desde el Inspector
+    public GameObject ImageB; // Asigna la ImageA de la letra A desde el Inspector
     public GameObject key; // Asigna el GameObject de la llave desde el Inspector
     public Collider chestCollider; // Asigna el collider del cofre desde el Inspector
 
@@ -10,7 +10,7 @@ public class Chest1 : MonoBehaviour
 
     private void Start()
     {
-        ImageA.SetActive(false); // Asegúrate de que la ImageA esté oculta al inicio
+        ImageB.SetActive(false); // Asegúrate de que la ImageA esté oculta al inicio
         if (key != null)
         {
             key.SetActive(true); // Asegúrate de que la llave esté visible al inicio
@@ -42,7 +42,7 @@ public class Chest1 : MonoBehaviour
             gameObject.SetActive(false); // El cofre desaparece
 
             // Mostrar la imagen
-            ImageA.SetActive(true); // Aparece la Imagen A
+            ImageB.SetActive(true); // Aparece la Imagen A
 
             Debug.Log("El cofre y la llave han desaparecido. La Imagen A ha sido revelada.");
         }

@@ -1,43 +1,36 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class Slot : MonoBehaviour
 {
-    public GameObject currentImage; // Imagen actualmente en el slot
-    public SlotManager slotManager; // Referencia al SlotManager
+    public string acceptedObjectTag; // El nombre del objeto que el slot acepta.
+    public Color highlightColor; // Color que se aplicará cuando el objeto correcto esté en el slot.
 
-    private void Start()
-    {
-        slotManager = FindObjectOfType<SlotManager>(); // Encontrar el SlotManager
-    }
+    private bool isFilled = false;
 
-    // Método para colocar la imagen en el slot
-    public void PlaceImage(GameObject image)
+    // Verifica si el objeto que entra es aceptado por el slot.
+    public bool AcceptsObject(GameObject obj)
     {
-        // Si el slot está vacío
-        if (currentImage == null)
+        // Compara el nombre del objeto con el valor aceptado
+        if (obj.name == acceptedObjectTag && !isFilled)
         {
-            currentImage = image;
-            image.transform.SetParent(transform); // Hacer que la imagen sea hija del slot
-            image.transform.localPosition = Vector3.zero; // Ajustar la posición de la imagen
-            image.GetComponent<Collider>().isTrigger = true; // Desactivar el collider de la imagen
-            image.GetComponent<Rigidbody>().isKinematic = true; // Evitar que la imagen caiga
-
-            // Verificar si todos los slots están ocupados
-            slotManager.CheckSlots(); // Notificar al SlotManager
+            return true; // El objeto es aceptado.
+        }
+        else
+        {
+            Debug.Log("El objeto no coincide o el slot ya está lleno.");
+            return false; // El objeto no es aceptado.
         }
     }
 
-    // Método para liberar el slot si es necesario
-    public void ReleaseImage()
+    // Cambia el color del slot y lo marca como lleno.
+    public void PlaceObject(GameObject obj)
     {
-        if (currentImage != null)
+        if (!isFilled)
         {
-            currentImage.transform.SetParent(null); // Separar la imagen del slot
-            currentImage.GetComponent<Collider>().isTrigger = false; // Reactivar el collider
-            currentImage.GetComponent<Rigidbody>().isKinematic = false; // Restaurar la física
-            currentImage = null; // Limpiar el slot
+            isFilled = true;
+            GetComponent<Renderer>().material.color = highlightColor; // Cambia el color del slot.
+            Debug.Log("Objeto colocado correctamente: " + obj.name);
+            Destroy(obj); // Elimina el objeto una vez colocado.
         }
     }
 }
